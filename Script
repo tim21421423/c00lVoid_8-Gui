@@ -1,0 +1,242 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+
+-- Создание GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "c00lVoid_8_Menu"
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 300, 0, 400)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
+Frame.BackgroundColor3 = Color3.fromRGB(0, 120, 215) -- Windows 10 style
+Frame.BorderSizePixel = 2
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 50)
+Title.BackgroundColor3 = Color3.fromRGB(0, 103, 197)
+Title.Text = "c00lVoid_GUI Version: 0.1 By: c00lVoid_8"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+Title.Font = Enum.Font.SourceSansBold
+Title.Parent = Frame
+
+-- Кнопки
+local function createButton(name, position, callback)
+    local Button = Instance.new("TextButton")
+    Button.Size = UDim2.new(0.8, 0, 0, 50)
+    Button.Position = position
+    Button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Button.Text = name
+    Button.TextColor3 = Color3.fromRGB(0, 0, 0)
+    Button.TextScaled = true
+    Button.Font = Enum.Font.SourceSans
+    Button.Parent = Frame
+    Button.MouseButton1Click:Connect(callback)
+end
+
+-- Код для работы с SyncAPI (общий для текстур и Skybox)
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local tool
+
+for _, v in player:GetDescendants() do
+    if v.Name == "SyncAPI" then
+        tool = v.Parent
+    end
+end
+
+for _, v in game.ReplicatedStorage:GetDescendants() do
+    if v.Name == "SyncAPI" then
+        tool = v.Parent
+    end
+end
+
+local remote = tool.SyncAPI.ServerEndpoint
+
+function _(args)
+    remote:InvokeServer(unpack(args))
+end
+
+function CreatePart(cf, parent)
+    _( {"CreatePart", "Normal", cf, parent} )
+end
+
+function SetAnchor(part, state)
+    _( {"SyncAnchor", { {["Part"] = part, ["Anchored"] = state} }} )
+end
+
+function AddMesh(part)
+    _( {"CreateMeshes", { {["Part"] = part} }} )
+end
+
+function SetMesh(part, meshid)
+    _( {"SyncMesh", { {["Part"] = part, ["MeshId"] = "rbxassetid://" .. meshid} }} )
+end
+
+function SetTexture(part, texid)
+    _( {"SyncMesh", { {["Part"] = part, ["TextureId"] = "rbxassetid://" .. texid} }} )
+end
+
+function MeshResize(part, size)
+    _( {"SyncMesh", { {["Part"] = part, ["Scale"] = size} }} )
+end
+
+function SetCollision(part, boolean)
+    _( {"SyncCollision", { {["Part"] = part, ["CanCollide"] = boolean} }} )
+end
+
+function DestroyPart(part)
+    _( {"Remove", {part}} )
+end
+
+function MovePart(part, cf)
+    _( {"SyncMove", { {["Part"] = part, ["CFrame"] = cf} }} )
+end
+
+function Resize(part, size, cf)
+    _( {"SyncResize", { {["Part"] = part, ["CFrame"] = cf, ["Size"] = size} }} )
+end
+
+function SetName(part, stringg)
+    _( {"SetName", {part}, stringg} )
+end
+
+function Weld(part1, part2, lead)
+    _( {"CreateWelds", {part1, part2}, lead} )
+end
+
+function SetLocked(part, boolean)
+    _( {"SetLocked", {part}, boolean} )
+end
+
+function SetTrans(part, int)
+    _( {"SyncMaterial", { {["Part"] = part, ["Transparency"] = int} }} )
+end
+
+function CreateSpotlight(part)
+    _( {"CreateLights", { {["Part"] = part, ["LightType"] = "SpotLight"} }} )
+end
+
+function SyncLighting(part, brightness)
+    _( {"SyncLighting", { {["Part"] = part, ["LightType"] = "SpotLight", ["Brightness"] = brightness} }} )
+end
+
+function Color(part, color)
+    _( {"SyncColor", { {["Part"] = part, ["Color"] = color, ["UnionColoring"] = false} }} )
+end
+
+function SpawnDecal(part, side)
+    _( {"CreateTextures", { {["Part"] = part, ["Face"] = side, ["TextureType"] = "Decal"} }} )
+end
+
+function AddDecal(part, asset, side)
+    _( {"SyncTexture", { {["Part"] = part, ["Face"] = side, ["TextureType"] = "Decal", ["Texture"] = "rbxassetid://" .. asset} }} )
+end
+
+-- Функция 1: Изменение текстур (добавление декалей на все стороны)
+local function spam(id)
+    for _, v in game.workspace:GetDescendants() do
+        if v:IsA("BasePart") then
+            spawn(function()
+                SetLocked(v, false)
+                SpawnDecal(v, Enum.NormalId.Front)
+                AddDecal(v, id, Enum.NormalId.Front)
+                SpawnDecal(v, Enum.NormalId.Back)
+                AddDecal(v, id, Enum.NormalId.Back)
+                SpawnDecal(v, Enum.NormalId.Right)
+                AddDecal(v, id, Enum.NormalId.Right)
+                SpawnDecal(v, Enum.NormalId.Left)
+                AddDecal(v, id, Enum.NormalId.Left)
+                SpawnDecal(v, Enum.NormalId.Bottom)
+                AddDecal(v, id, Enum.NormalId.Bottom)
+                SpawnDecal(v, Enum.NormalId.Top)
+                AddDecal(v, id, Enum.NormalId.Top)
+            end)
+        end
+    end 
+end
+
+createButton("Change Textures", UDim2.new(0.1, 0, 0.15, 0), function()
+    spam("97941139489452")
+end)
+
+-- Функция 2: Изменение Skybox
+local function Sky(id)
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local cf = hrp.CFrame
+    CreatePart(CFrame.new(cf.Position + Vector3.new(0, 6, 0)), workspace)
+    for _, v in workspace:GetDescendants() do
+        if v:IsA("BasePart") and v.Position == cf.Position + Vector3.new(0, 6, 0) then
+            SetAnchor(v, true)
+            AddMesh(v)
+            SetMesh(v, "111891702759441")
+            SetTexture(v, id)
+            MeshResize(v, Vector3.new(8000, 8000, 8000))
+        end
+    end
+end
+
+createButton("Change Skybox", UDim2.new(0.1, 0, 0.3, 0), function()
+    Sky("97941139489452")
+end)
+
+-- Функция 3: Очистка мира и создание Baseplate, спавна и декали
+createButton("JumpScare (Map)", UDim2.new(0.1, 0, 0.45, 0), function()
+    -- Очистка мира
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj ~= game.Players.LocalPlayer.Character then
+            DestroyPart(obj)
+        end
+    end
+    
+    -- Создание Baseplate
+    local baseplateCF = CFrame.new(0, 0, 0)
+    CreatePart(baseplateCF, workspace)
+    for _, v in workspace:GetDescendants() do
+        if v:IsA("BasePart") and v.Position == Vector3.new(0, 0, 0) then
+            SetName(v, "Baseplate")
+            Resize(v, Vector3.new(2048, 20, 2048), baseplateCF)
+            SetAnchor(v, true)
+        end
+    end
+    
+    -- Создание спавна
+    local spawnCF = CFrame.new(0, 10, 0)
+    CreatePart(spawnCF, workspace)
+    for _, v in workspace:GetDescendants() do
+        if v:IsA("BasePart") and v.Position == Vector3.new(0, 10, 0) then
+            SetName(v, "SpawnLocation")
+            Resize(v, Vector3.new(10, 1, 10), spawnCF)
+            SetAnchor(v, true)
+        end
+    end
+    
+    -- Создание блока с декалью (отодвинут на 25 единиц по Z)
+    local blockCF = CFrame.new(0, 15, 25) -- Смещение на 25 единиц по Z
+    CreatePart(blockCF, workspace)
+    for _, v in workspace:GetDescendants() do
+        if v:IsA("BasePart") and v.Position == Vector3.new(0, 15, 25) then
+            SetName(v, "DecalBlock")
+            Resize(v, Vector3.new(5, 5, 5), blockCF) -- Размер 5x5x5 для устранения растяжения
+            SetAnchor(v, true)
+            SpawnDecal(v, Enum.NormalId.Front)
+            AddDecal(v, "97941139489452", Enum.NormalId.Front)
+        end
+    end
+end)
+
+-- Стилизация под Windows 10
+Frame.BackgroundTransparency = 0.2
+Frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+
+-- Закрытие меню
+createButton("Close", UDim2.new(0.1, 0, 0.85, 0), function()
+    ScreenGui:Destroy()
+end)
