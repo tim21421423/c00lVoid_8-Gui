@@ -1,49 +1,46 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
-local UserInputService = game:GetService("UserInputService")
+local TextChatService = game:GetService("TextChatService")
 
--- Создание GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "c00lVoid_8_Menu"
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+-- Load Rayfield library
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 300, 0, 400)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -200)
-Frame.BackgroundColor3 = Color3.fromRGB(0, 120, 215) -- Windows 10 style
-Frame.BorderSizePixel = 2
-Frame.Active = true
-Frame.Draggable = true
-Frame.Parent = ScreenGui
+-- Create Rayfield window
+local Window = Rayfield:CreateWindow({
+    Name = "c00lVoid_8 Menu By: c00lVoid_8 And TIMOHA9399",
+    LoadingTitle = "c00lVoid_8 Menu Version: 0.1",
+    LoadingSubtitle = "By: c00lVoid_8",
+    ConfigurationSaving = {
+        Enabled = false,
+        FolderName = nil,
+        FileName = "c00lVoid_8_Config"
+    }
+})
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 50)
-Title.BackgroundColor3 = Color3.fromRGB(0, 103, 197)
-Title.Text = "c00lVoid_GUI Version: 0.1 By: c00lVoid_8"
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.TextScaled = true
-Title.Font = Enum.Font.SourceSansBold
-Title.Parent = Frame
+-- Create main tab
+local Tab = Window:CreateTab("Main", nil) -- Icon can be added if needed
 
--- Кнопки
-local function createButton(name, position, callback)
-    local Button = Instance.new("TextButton")
-    Button.Size = UDim2.new(0.8, 0, 0, 50)
-    Button.Position = position
-    Button.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Button.Text = name
-    Button.TextColor3 = Color3.fromRGB(0, 0, 0)
-    Button.TextScaled = true
-    Button.Font = Enum.Font.SourceSans
-    Button.Parent = Frame
-    Button.MouseButton1Click:Connect(callback)
+-- Universal chat function (supports old and new chat systems)
+local function chatCmd(msg)
+    if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+        -- New chat system
+        TextChatService.TextChannels.RBXGeneral:SendAsync(msg)
+    else
+        -- Old chat system
+        ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer(msg, "All")
+    end
 end
 
--- Код для работы с SyncAPI (общий для текстур и Skybox)
+-- SyncAPI setup (shared for textures, Skybox, Unanchor, etc.)
 local player = game.Players.LocalPlayer
 local char = player.Character or player.CharacterAdded:Wait()
+
+-- Update char on player death
+player.CharacterAdded:Connect(function(newCharacter)
+    char = newCharacter
+end)
+
 local tool
 
 for _, v in player:GetDescendants() do
@@ -140,9 +137,9 @@ function AddDecal(part, asset, side)
     _( {"SyncTexture", { {["Part"] = part, ["Face"] = side, ["TextureType"] = "Decal", ["Texture"] = "rbxassetid://" .. asset} }} )
 end
 
--- Функция 1: Изменение текстур (добавление декалей на все стороны)
+-- Function 1: Change Textures (apply decals to all sides)
 local function spam(id)
-    for _, v in game.workspace:GetDescendants() do
+    for _, v in game.Workspace:GetDescendants() do
         if v:IsA("BasePart") then
             spawn(function()
                 SetLocked(v, false)
@@ -163,11 +160,14 @@ local function spam(id)
     end 
 end
 
-createButton("Change Textures", UDim2.new(0.1, 0, 0.15, 0), function()
-    spam("97941139489452")
-end)
+Tab:CreateButton({
+    Name = "Change Textures",
+    Callback = function()
+        spam("97941139489452")
+    end
+})
 
--- Функция 2: Изменение Skybox
+-- Function 2: Change Skybox
 local function Sky(id)
     local hrp = char:WaitForChild("HumanoidRootPart")
     local cf = hrp.CFrame
@@ -183,60 +183,122 @@ local function Sky(id)
     end
 end
 
-createButton("Change Skybox", UDim2.new(0.1, 0, 0.3, 0), function()
-    Sky("97941139489452")
-end)
+Tab:CreateButton({
+    Name = "Change Skybox",
+    Callback = function()
+        Sky("97941139489452")
+    end
+})
 
--- Функция 3: Очистка мира и создание Baseplate, спавна и декали
-createButton("JumpScare (Map)", UDim2.new(0.1, 0, 0.45, 0), function()
-    -- Очистка мира
-    for _, obj in pairs(workspace:GetChildren()) do
-        if obj ~= game.Players.LocalPlayer.Character then
-            DestroyPart(obj)
+-- Function 3: Reset World (clear world, create Baseplate, spawn, and decal block)
+Tab:CreateButton({
+    Name = "Reset World",
+    Callback = function()
+        -- Clear world
+        for _, obj in pairs(workspace:GetChildren()) do
+            if obj ~= game.Players.LocalPlayer.Character then
+                DestroyPart(obj)
+            end
+        end
+        
+        -- Create Baseplate
+        local baseplateCF = CFrame.new(0, 0, 0)
+        CreatePart(baseplateCF, workspace)
+        for _, v in workspace:GetDescendants() do
+            if v:IsA("BasePart") and v.Position == Vector3.new(0, 0, 0) then
+                SetName(v, "Baseplate")
+                Resize(v, Vector3.new(2048, 20, 2048), baseplateCF)
+                SetAnchor(v, true)
+            end
+        end
+        
+        -- Create spawn
+        local spawnCF = CFrame.new(0, 10, 0)
+        CreatePart(spawnCF, workspace)
+        for _, v in workspace:GetDescendants() do
+            if v:IsA("BasePart") and v.Position == Vector3.new(0, 10, 0) then
+                SetName(v, "SpawnLocation")
+                Resize(v, Vector3.new(10, 1, 10), spawnCF)
+                SetAnchor(v, true)
+            end
+        end
+        
+        -- Create block with decal (offset by 25 units on Z, resized)
+        local blockCF = CFrame.new(0, 15, 25) -- Offset by 25 units on Z
+        CreatePart(blockCF, workspace)
+        for _, v in workspace:GetDescendants() do
+            if v:IsA("BasePart") and v.Position == Vector3.new(0, 15, 25) then
+                SetName(v, "DecalBlock")
+                Resize(v, Vector3.new(10, 7, 5), blockCF) -- X=10 (left 5 + right 5), Y=7 (top 5 + bottom 2), Z=5
+                SetAnchor(v, true)
+                SpawnDecal(v, Enum.NormalId.Front)
+                AddDecal(v, "97941139489452", Enum.NormalId.Front)
+            end
         end
     end
-    
-    -- Создание Baseplate
-    local baseplateCF = CFrame.new(0, 0, 0)
-    CreatePart(baseplateCF, workspace)
-    for _, v in workspace:GetDescendants() do
-        if v:IsA("BasePart") and v.Position == Vector3.new(0, 0, 0) then
-            SetName(v, "Baseplate")
-            Resize(v, Vector3.new(2048, 20, 2048), baseplateCF)
-            SetAnchor(v, true)
-        end
-    end
-    
-    -- Создание спавна
-    local spawnCF = CFrame.new(0, 10, 0)
-    CreatePart(spawnCF, workspace)
-    for _, v in workspace:GetDescendants() do
-        if v:IsA("BasePart") and v.Position == Vector3.new(0, 10, 0) then
-            SetName(v, "SpawnLocation")
-            Resize(v, Vector3.new(10, 1, 10), spawnCF)
-            SetAnchor(v, true)
-        end
-    end
-    
-    -- Создание блока с декалью (отодвинут на 25 единиц по Z)
-    local blockCF = CFrame.new(0, 15, 25) -- Смещение на 25 единиц по Z
-    CreatePart(blockCF, workspace)
-    for _, v in workspace:GetDescendants() do
-        if v:IsA("BasePart") and v.Position == Vector3.new(0, 15, 25) then
-            SetName(v, "DecalBlock")
-            Resize(v, Vector3.new(5, 5, 5), blockCF) -- Размер 5x5x5 для устранения растяжения
-            SetAnchor(v, true)
-            SpawnDecal(v, Enum.NormalId.Front)
-            AddDecal(v, "97941139489452", Enum.NormalId.Front)
-        end
-    end
-end)
+})
 
--- Стилизация под Windows 10
-Frame.BackgroundTransparency = 0.2
-Frame.BorderColor3 = Color3.fromRGB(255, 255, 255)
+-- Function 4: Create Baseplate (separate button)
+Tab:CreateButton({
+    Name = "Create Baseplate",
+    Callback = function()
+        local baseplateCF = CFrame.new(0, 0, 0)
+        CreatePart(baseplateCF, workspace)
+        for _, v in workspace:GetDescendants() do
+            if v:IsA("BasePart") and v.Position == Vector3.new(0, 0, 0) then
+                SetName(v, "Baseplate")
+                Resize(v, Vector3.new(2048, 20, 2048), baseplateCF)
+                SetAnchor(v, true)
+            end
+        end
+    end
+})
 
--- Закрытие меню
-createButton("Close", UDim2.new(0.1, 0, 0.85, 0), function()
-    ScreenGui:Destroy()
-end)
+-- Function 5: Play Music (using chatCmd)
+Tab:CreateButton({
+    Name = "Play Music",
+    Callback = function()
+        chatCmd(";music 77484784570543 ;pitch 0.09 ;volume 10000")
+    end
+})
+
+-- Function 6: Give Btools (using chatCmd)
+Tab:CreateButton({
+    Name = "Give Btools",
+    Callback = function()
+        chatCmd(";btools")
+    end
+})
+
+-- Function 7: Disco (using chatCmd)
+Tab:CreateButton({
+    Name = "Disco",
+    Callback = function()
+        chatCmd(";disco ;fog 0.3")
+    end
+})
+
+-- Function 8: Unanchor All
+local function unanchorAll()
+    for _, v in game.Workspace:GetDescendants() do
+        spawn(function()
+            SetLocked(v, false)
+            SetAnchor(v, false)
+        end)
+    end
+end
+
+Tab:CreateButton({
+    Name = "Unanchor All",
+    Callback = function()
+        unanchorAll()
+    end
+})
+
+-- Close menu
+Tab:CreateButton({
+    Name = "Close",
+    Callback = function()
+        Rayfield:Destroy()
+    end
+})
