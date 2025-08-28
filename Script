@@ -10,7 +10,7 @@ local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/Siri
 -- Create Rayfield window
 local Window = Rayfield:CreateWindow({
     Name = "c00lVoid_8 Menu By: c00lVoid_8 And TIMOHA9399",
-    LoadingTitle = "c00lVoid_8 Menu Version: 0.2",
+    LoadingTitle = "c00lVoid_8 Menu Version: 0.3",
     LoadingSubtitle = "By: c00lVoid_8",
     ConfigurationSaving = {
         Enabled = false,
@@ -119,11 +119,11 @@ function SetTrans(part, int)
 end
 
 function CreateSpotlight(part)
-    _( {"CreateLights", { {["Part"] = part, ["LightType"] = "PointLight"} }} )
+    _( {"CreateLights", { {["Part"] = part, ["LightType"] = "SpotLight"} }} )
 end
 
-function SyncLighting(part, brightness, color)
-    _( {"SyncLighting", { {["Part"] = part, ["LightType"] = "PointLight", ["Brightness"] = brightness, ["Color"] = color} }} )
+function SyncLighting(part, brightness)
+    _( {"SyncLighting", { {["Part"] = part, ["LightType"] = "SpotLight", ["Brightness"] = brightness} }} )
 end
 
 function Color(part, color)
@@ -336,7 +336,7 @@ local function skeletonSkybox()
         "114128626690223"
     }
     local textureIndex = 1
-    local changeInterval = 2 -- Seconds between texture changes
+    local changeInterval = 0.2 -- Seconds between texture changes
     local elapsedTime = 0
     
     skyboxConnection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -372,75 +372,44 @@ Tab:CreateButton({
     end
 })
 
--- Function 10: Fire All (add fire effect to all blocks and players via SyncAPI)
-local fireConnection = nil
-local fireParts = {} -- Table to store parts with fire effect
+-- Function 10: Titler (using chatCmd)
+Tab:CreateButton({
+    Name = "Titler",
+    Callback = function()
+        chatCmd(";titler me c00lVoid_8")
+    end
+})
+
+-- Function 11: Fire All (using SyncAPI to set fire to all blocks and players)
+local fireParts = {}
 
 local function fireAll()
-    if fireConnection then
-        fireConnection:Disconnect()
-        fireConnection = nil
-        for part, _ in pairs(fireParts) do
-            if part then
-                DestroyPart(part) -- Remove fire effect (PointLight is tied to a dummy part)
-            end
-        end
-        fireParts = {}
-        return
-    end
-    
-    -- Add fire effect to all BaseParts in workspace (except player characters)
+    -- Add fire to all BaseParts in workspace
     for _, v in pairs(game.Workspace:GetDescendants()) do
-        if v:IsA("BasePart") and not Players:GetPlayerFromCharacter(v.Parent) then
+        if v:IsA("BasePart") and not fireParts[v] then
             spawn(function()
                 SetLocked(v, false)
                 CreateSpotlight(v)
-                SyncLighting(v, 2, Color3.new(1, 0.5, 0)) -- Orange-red fire color
+                SyncLighting(v, 2)
+                Color(v, Color3.new(1, 0.5, 0)) -- Orange fire color
                 fireParts[v] = true
             end)
         end
     end
-    
-    -- Add fire effect to all players' HumanoidRootPart
+
+    -- Add fire to all players' HumanoidRootPart
     for _, p in pairs(Players:GetPlayers()) do
-        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and not fireParts[p.Character.HumanoidRootPart] then
             local hrp = p.Character.HumanoidRootPart
             spawn(function()
                 SetLocked(hrp, false)
                 CreateSpotlight(hrp)
-                SyncLighting(hrp, 2, Color3.new(1, 0.5, 0)) -- Orange-red fire color
+                SyncLighting(hrp, 2)
+                Color(hrp, Color3.new(1, 0.5, 0)) -- Orange fire color
                 fireParts[hrp] = true
             end)
         end
     end
-    
-    -- Monitor new players and workspace parts
-    fireConnection = RunService.Heartbeat:Connect(function()
-        -- Add fire to new players
-        for _, p in pairs(Players:GetPlayers()) do
-            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and not fireParts[p.Character.HumanoidRootPart] then
-                local hrp = p.Character.HumanoidRootPart
-                spawn(function()
-                    SetLocked(hrp, false)
-                    CreateSpotlight(hrp)
-                    SyncLighting(hrp, 2, Color3.new(1, 0.5, 0))
-                    fireParts[hrp] = true
-                end)
-            end
-        end
-        
-        -- Add fire to new BaseParts
-        for _, v in pairs(game.Workspace:GetDescendants()) do
-            if v:IsA("BasePart") and not Players:GetPlayerFromCharacter(v.Parent) and not fireParts[v] then
-                spawn(function()
-                    SetLocked(v, false)
-                    CreateSpotlight(v)
-                    SyncLighting(v, 2, Color3.new(1, 0.5, 0))
-                    fireParts[v] = true
-                end)
-            end
-        end
-    end)
 end
 
 Tab:CreateButton({
@@ -450,65 +419,66 @@ Tab:CreateButton({
     end
 })
 
--- Function 11: Vanish Blocks (blocks disappear under players' feet)
-local vanishConnection = nil
-local vanishBlocks = {} -- Table to store blocks and their timers
+-- Function 12: Rain c00lVoid_8 (blocks fall from sky with texture 97941139489452 on all sides)
+local rainConnection = nil
+local rainParts = {}
 
-local function vanishBlocks()
-    if vanishConnection then
-        vanishConnection:Disconnect()
-        vanishConnection = nil
-        for block, _ in pairs(vanishBlocks) do
-            if block then
-                DestroyPart(block)
+local function rainc00lVoid8()
+    if rainConnection then
+        rainConnection:Disconnect()
+        rainConnection = nil
+        for _, part in pairs(rainParts) do
+            if part then
+                DestroyPart(part)
             end
         end
-        vanishBlocks = {}
+        rainParts = {}
         return
     end
-    
-    vanishConnection = RunService.Heartbeat:Connect(function(deltaTime)
-        for _, p in pairs(Players:GetPlayers()) do
-            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = p.Character.HumanoidRootPart
-                local pos = hrp.Position
-                local cf = CFrame.new(pos.X, pos.Y - 2, pos.Z) -- Block under player's feet
-                local blockExists = false
-                
-                -- Check if a block already exists at this position
-                for block, _ in pairs(vanishBlocks) do
-                    if block and (block.Position - pos).Magnitude < 2 then
-                        blockExists = true
-                        break
-                    end
-                end
-                
-                if not blockExists then
-                    -- Create a new block
-                    CreatePart(cf, workspace)
-                    for _, v in workspace:GetDescendants() do
-                        if v:IsA("BasePart") and v.Position == cf.Position then
-                            SetName(v, "VanishBlock")
-                            Resize(v, Vector3.new(4, 0.2, 4), cf)
-                            SetAnchor(v, true)
-                            SetCollision(v, false)
-                            SetTrans(v, 1) -- Invisible
-                            vanishBlocks[v] = 1 -- Set timer to 1 second
-                            break
-                        end
-                    end
-                end
-            end
-        end
-        
-        -- Update timers and remove expired blocks
-        for block, timer in pairs(vanishBlocks) do
-            if block then
-                timer = timer - deltaTime
-                vanishBlocks[block] = timer
-                if timer <= 0 then
-                    DestroyPart(block)
-                    vanishBlocks[block] = nil
+
+    rainConnection = RunService.Heartbeat:Connect(function()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        local spawnHeight = hrp.Position.Y + 100 -- Spawn blocks 100 units above player
+        for i = 1, 10 do -- Create 10 blocks per frame
+            local x = hrp.Position.X + math.random(-50, 50)
+            local z = hrp.Position.Z + math.random(-50, 50)
+            local cf = CFrame.new(x, spawnHeight, z)
+            CreatePart(cf, workspace)
+            for _, v in workspace:GetDescendants() do
+                if v:IsA("BasePart") and (v.Position - cf.Position).Magnitude < 0.1 then
+                    SetName(v, "RainBlock" .. i)
+                    Resize(v, Vector3.new(2, 2, 2), cf)
+                    SetAnchor(v, false)
+                    SetCollision(v, true)
+                    SetTrans(v, 0)
+                    spawn(function()
+                        spawn(function()
+                            SpawnDecal(v, Enum.NormalId.Front)
+                            AddDecal(v, "97941139489452", Enum.NormalId.Front)
+                        end)
+                        spawn(function()
+                            SpawnDecal(v, Enum.NormalId.Back)
+                            AddDecal(v, "97941139489452", Enum.NormalId.Back)
+                        end)
+                        spawn(function()
+                            SpawnDecal(v, Enum.NormalId.Right)
+                            AddDecal(v, "97941139489452", Enum.NormalId.Right)
+                        end)
+                        spawn(function()
+                            SpawnDecal(v, Enum.NormalId.Left)
+                            AddDecal(v, "97941139489452", Enum.NormalId.Left)
+                        end)
+                        spawn(function()
+                            SpawnDecal(v, Enum.NormalId.Top)
+                            AddDecal(v, "97941139489452", Enum.NormalId.Top)
+                        end)
+                        spawn(function()
+                            SpawnDecal(v, Enum.NormalId.Bottom)
+                            AddDecal(v, "97941139489452", Enum.NormalId.Bottom)
+                        end)
+                    end)
+                    rainParts[v] = true
+                    break
                 end
             end
         end
@@ -516,17 +486,127 @@ local function vanishBlocks()
 end
 
 Tab:CreateButton({
-    Name = "Vanish Blocks",
+    Name = "Rain c00lVoid_8",
     Callback = function()
-        vanishBlocks()
+        rainc00lVoid8()
     end
 })
 
--- Function 12: Titler (using chatCmd)
+-- Function 13: Skybox c00lkidd
+local c00lkiddSkyboxPart = nil
+
+local function c00lkiddSkybox()
+    if c00lkiddSkyboxPart then
+        DestroyPart(c00lkiddSkyboxPart)
+        c00lkiddSkyboxPart = nil
+        return
+    end
+
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local cf = CFrame.new(hrp.Position + Vector3.new(0, 6, 0))
+    CreatePart(cf, workspace)
+    for _, v in workspace:GetDescendants() do
+        if v:IsA("BasePart") and v.Position == cf.Position then
+            c00lkiddSkyboxPart = v
+            SetName(v, "c00lkiddSkybox")
+            SetAnchor(v, true)
+            AddMesh(v)
+            SetMesh(v, "111891702759441")
+            SetTexture(v, "158118263")
+            MeshResize(v, Vector3.new(8000, 8000, 8000))
+            break
+        end
+    end
+end
+
 Tab:CreateButton({
-    Name = "Titler",
+    Name = "c00lkidd Skybox",
     Callback = function()
-        chatCmd(";titler me c00lVoid_8")
+        c00lkiddSkybox()
+    end
+})
+
+-- Function 14: Decal Spam c00lkidd
+Tab:CreateButton({
+    Name = "c00lkidd Decal Spam",
+    Callback = function()
+        spam("158118263")
+    end
+})
+
+-- Function 15: g00byd0lan Skybox
+local g00byd0lanSkyboxPart = nil
+
+local function g00byd0lanSkybox()
+    if g00byd0lanSkyboxPart then
+        DestroyPart(g00byd0lanSkyboxPart)
+        g00byd0lanSkyboxPart = nil
+        return
+    end
+
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local cf = CFrame.new(hrp.Position + Vector3.new(0, 6, 0))
+    CreatePart(cf, workspace)
+    for _, v in workspace:GetDescendants() do
+        if v:IsA("BasePart") and v.Position == cf.Position then
+            g00byd0lanSkyboxPart = v
+            SetName(v, "g00byd0lanSkybox")
+            SetAnchor(v, true)
+            AddMesh(v)
+            SetMesh(v, "111891702759441")
+            SetTexture(v, "120403563303015")
+            MeshResize(v, Vector3.new(8000, 8000, 8000))
+            break
+        end
+    end
+end
+
+Tab:CreateButton({
+    Name = "g00byd0lan Skybox",
+    Callback = function()
+        g00byd0lanSkybox()
+    end
+})
+
+-- Function 16: g00byd0lan Decal Spam
+Tab:CreateButton({
+    Name = "g00byd0lan Decal Spam",
+    Callback = function()
+        spam("120403563303015")
+    end
+})
+
+-- Function 17: Spam Team
+local teamSpamConnection = nil
+local createdTeams = {}
+
+local function spamTeam()
+    if teamSpamConnection then
+        teamSpamConnection:Disconnect()
+        teamSpamConnection = nil
+        for _, team in pairs(createdTeams) do
+            if team then
+                team:Destroy()
+            end
+        end
+        createdTeams = {}
+        return
+    end
+
+    teamSpamConnection = RunService.Heartbeat:Connect(function()
+        for i = 1, 100 do
+            local team = Instance.new("Team")
+            team.Name = "c00lVoid_8 IS HERE"
+            team.Parent = game:GetService("Teams")
+            createdTeams[team] = true
+        end
+    end)
+end
+
+Tab:CreateButton({
+    Name = "Spam Team",
+    Callback = function()
+        spamTeam()
     end
 })
 
@@ -542,25 +622,25 @@ Tab:CreateButton({
                 skyboxPart = nil
             end
         end
-        if fireConnection then
-            fireConnection:Disconnect()
-            fireConnection = nil
-            for part, _ in pairs(fireParts) do
+        if rainConnection then
+            rainConnection:Disconnect()
+            rainConnection = nil
+            for _, part in pairs(rainParts) do
                 if part then
                     DestroyPart(part)
                 end
             end
-            fireParts = {}
+            rainParts = {}
         end
-        if vanishConnection then
-            vanishConnection:Disconnect()
-            vanishConnection = nil
-            for block, _ in pairs(vanishBlocks) do
-                if block then
-                    DestroyPart(block)
+        if teamSpamConnection then
+            teamSpamConnection:Disconnect()
+            teamSpamConnection = nil
+            for _, team in pairs(createdTeams) do
+                if team then
+                    team:Destroy()
                 end
             end
-            vanishBlocks = {}
+            createdTeams = {}
         end
         Rayfield:Destroy()
     end
