@@ -10,7 +10,7 @@ local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/Siri
 -- Create Rayfield window
 local Window = Rayfield:CreateWindow({
     Name = "c00lVoid_8 Menu By: c00lVoid_8 And TIMOHA9399",
-    LoadingTitle = "c00lVoid_8 Menu Version: 0.3",
+    LoadingTitle = "c00lVoid_8 Menu Version: 0.4",
     LoadingSubtitle = "By: c00lVoid_8",
     ConfigurationSaving = {
         Enabled = false,
@@ -336,7 +336,7 @@ local function skeletonSkybox()
         "114128626690223"
     }
     local textureIndex = 1
-    local changeInterval = 0.2 -- Seconds between texture changes
+    local changeInterval = 2 -- Seconds between texture changes
     local elapsedTime = 0
     
     skyboxConnection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -610,6 +610,48 @@ Tab:CreateButton({
     end
 })
 
+-- Function 18: c00lVoid_8 2 Skybox
+local c00lVoid8_2SkyboxPart = nil
+
+local function c00lVoid8_2Skybox()
+    if c00lVoid8_2SkyboxPart then
+        DestroyPart(c00lVoid8_2SkyboxPart)
+        c00lVoid8_2SkyboxPart = nil
+        return
+    end
+
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    local cf = CFrame.new(hrp.Position + Vector3.new(0, 6, 0))
+    CreatePart(cf, workspace)
+    for _, v in workspace:GetDescendants() do
+        if v:IsA("BasePart") and v.Position == cf.Position then
+            c00lVoid8_2SkyboxPart = v
+            SetName(v, "c00lVoid_8 2 Skybox")
+            SetAnchor(v, true)
+            AddMesh(v)
+            SetMesh(v, "111891702759441")
+            SetTexture(v, "111450750967456")
+            MeshResize(v, Vector3.new(8000, 8000, 8000))
+            break
+        end
+    end
+end
+
+Tab:CreateButton({
+    Name = "c00lVoid_8 2 Skybox",
+    Callback = function()
+        c00lVoid8_2Skybox()
+    end
+})
+
+-- Function 19: c00lVoid_8 2 Decal Spam
+Tab:CreateButton({
+    Name = "c00lVoid_8 2 Decal Spam",
+    Callback = function()
+        spam("111450750967456")
+    end
+})
+
 -- Close menu
 Tab:CreateButton({
     Name = "Close",
@@ -641,6 +683,10 @@ Tab:CreateButton({
                 end
             end
             createdTeams = {}
+        end
+        if c00lVoid8_2SkyboxPart then
+            DestroyPart(c00lVoid8_2SkyboxPart)
+            c00lVoid8_2SkyboxPart = nil
         end
         Rayfield:Destroy()
     end
