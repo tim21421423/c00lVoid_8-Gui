@@ -180,7 +180,7 @@ local function Sky(id)
             AddMesh(v)
             SetMesh(v, "111891702759441")
             SetTexture(v, id)
-            MeshResize(v, Vector3.new(8000, 8000, 8000))
+            MeshResize(v, Vector3.new(3000, 3000, 3000))
         end
     end
 end
@@ -345,7 +345,7 @@ local function skeletonSkybox()
         "114128626690223"
     }
     local textureIndex = 1
-    local changeInterval = 0.2 -- Seconds between texture changes
+    local changeInterval = 0.25 -- Seconds between texture changes
     local elapsedTime = 0
     
     skyboxConnection = RunService.Heartbeat:Connect(function(deltaTime)
@@ -522,7 +522,7 @@ local function c00lkiddSkybox()
             AddMesh(v)
             SetMesh(v, "111891702759441")
             SetTexture(v, "158118263")
-            MeshResize(v, Vector3.new(8000, 8000, 8000))
+            MeshResize(v, Vector3.new(3000, 3000, 3000))
             break
         end
     end
@@ -564,7 +564,7 @@ local function g00byd0lanSkybox()
             AddMesh(v)
             SetMesh(v, "111891702759441")
             SetTexture(v, "120403563303015")
-            MeshResize(v, Vector3.new(8000, 8000, 8000))
+            MeshResize(v, Vector3.new(3000, 3000, 3000))
             break
         end
     end
@@ -640,7 +640,7 @@ local function c00lVoid8_2Skybox()
             AddMesh(v)
             SetMesh(v, "111891702759441")
             SetTexture(v, "111450750967456")
-            MeshResize(v, Vector3.new(8000, 8000, 8000))
+            MeshResize(v, Vector3.new(3000, 3000, 3000))
             break
         end
     end
