@@ -427,6 +427,44 @@ Tab:CreateButton({
     end
 })
 
+local frozenPlayers = {}
+local freezeConnection = nil
+local freezeEnabled = false
+
+local function toggleFreezeAll()
+    if not freezeEnabled then
+        -- Включаем заморозку
+        freezeConnection = RunService.RenderStepped:Connect(function()
+            for _, p in pairs(Players:GetPlayers()) do
+                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                    SetAnchor(p.Character.HumanoidRootPart, true)
+                    frozenPlayers[p] = p
+                end
+            end
+        end)
+        freezeEnabled = true
+    else
+        -- Выключаем заморозку
+        if freezeConnection then
+            freezeConnection:Disconnect()
+            freezeConnection = nil
+        end
+        for _, p in pairs(frozenPlayers) do
+            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                SetAnchor(p.Character.HumanoidRootPart, false)
+            end
+        end
+        frozenPlayers = {}
+        freezeEnabled = false
+    end
+end
+
+-- Кнопка в меню
+Tab:CreateButton({
+    Name = "Toggle Freeze All",
+    Callback = toggleFreezeAll
+})
+
 -- Function 11: Fire All (using SyncAPI to set fire to all blocks and players)
 local fireParts = {}
 
