@@ -389,6 +389,44 @@ Tab:CreateButton({
     end
 })
 
+-- Function idk: r6 (using chatCmd)
+Tab:CreateButton({
+    Name = "R6",
+    Callback = function()
+        chatCmd(";r6")
+    end
+})
+
+-- Function idk: re (using chatCmd)
+Tab:CreateButton({
+    Name = "RE",
+    Callback = function()
+        chatCmd(";re")
+    end
+})
+
+-- Function idk: Message (using chatCmd)
+Tab:CreateButton({
+    Name = "Message",
+    Callback = function()
+        chatCmd(";m Team c00lVoid_8 Join Today! | By: c00lVoid_8")
+    end
+})
+
+Tab:CreateButton({
+    Name = "Char all c00lVoid_8",
+    Callback = function()
+        chatCmd(";char all c00lVoid_8")
+    end
+})
+
+Tab:CreateButton({
+    Name = "Name all",
+    Callback = function()
+        chatCmd(";name all c00lVoid_8")
+    end
+})
+
 -- Function 11: Fire All (using SyncAPI to set fire to all blocks and players)
 local fireParts = {}
 
